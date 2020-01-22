@@ -2,10 +2,6 @@ package com.presto.menu.controller;
 
 import com.presto.menu.model.JoeMenuRequest;
 import com.presto.menu.model.response.Response;
-import com.presto.menu.repository.CategoryItemRepository;
-import com.presto.menu.repository.CategoryRepository;
-import com.presto.menu.repository.ItemRepository;
-import com.presto.menu.repository.entity.CategoryItems;
 import com.presto.menu.service.MenuService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -15,13 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "/restaurant")
@@ -40,10 +33,6 @@ public class MenuController {
 
   @Autowired
   private MenuService menuService;
-  @Autowired
-  private ItemRepository itemRepository;
-  @Autowired
-  private CategoryRepository categoryRepository;
 
   @ApiOperation(
       value = "",
@@ -83,15 +72,8 @@ public class MenuController {
       response = Response.class)
   @RequestMapping(value = "/get_items", method = RequestMethod.GET)
   @ResponseStatus(HttpStatus.OK)
-  public Object getItems(HttpServletRequest request,
-                         HttpServletResponse response) {
-    Response apiResponse = new Response();
-    try {
-      return categoryRepository.findAll();
-    } catch (Exception ex) {
-      LOGGER.error("Error occurred while fetching items {}", ex);
-    }
-    return "No items are exit in system.";
+  public Object getItems() {
+    return menuService.getItems();
   }
 
   @ApiOperation(
@@ -102,11 +84,6 @@ public class MenuController {
   @RequestMapping(value = "/get_categories", method = RequestMethod.GET)
   @ResponseStatus(HttpStatus.OK)
   public Object getCategories() {
-    try {
-      return itemRepository.findAll();
-    } catch (Exception ex) {
-      LOGGER.error("Error occurred while fetching categories {}", ex);
-    }
-    return "No categories are exit in system.";
+    return menuService.getCategories();
   }
 }

@@ -11,10 +11,10 @@ public class CategoryItems {
   @Column(name = "id", updatable = false, nullable = false)
   private Long Id;
 
-  @Column(name = "ITEM_ID", updatable = false, nullable = false)
+  @Column(name = "ITEM_ID")
   private Long itemId;
 
-  @Column(name = "CATEGORY_ID", updatable = false, nullable = false)
+  @Column(name = "CATEGORY_ID")
   private Long categoryId;
 
   public Long getId() {

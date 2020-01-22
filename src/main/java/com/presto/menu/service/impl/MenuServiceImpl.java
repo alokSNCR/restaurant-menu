@@ -4,13 +4,16 @@ import com.presto.menu.model.JoeMenuRequest;
 import com.presto.menu.repository.CategoryItemRepository;
 import com.presto.menu.repository.CategoryRepository;
 import com.presto.menu.repository.ItemRepository;
+import com.presto.menu.repository.entity.Category;
 import com.presto.menu.repository.entity.CategoryItems;
 import com.presto.menu.repository.entity.Item;
 import com.presto.menu.service.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MenuServiceImpl implements MenuService {
@@ -45,17 +48,42 @@ public class MenuServiceImpl implements MenuService {
 
     // save category item table
     List<Item> items = itemRepository.findAll();
+
     List<com.presto.menu.repository.entity.Category> categoryList = categoryRepository.findAll();
-    menuRequest.getItem().stream().forEach(it -> {
-      CategoryItems categoryItems = new CategoryItems();
-      Long itemId = items.stream().filter(item ->
-          item.getName().equals(it.getName())).findAny().get().getId();
-      categoryItems.setItemId(itemId);
-      Long categoryId = categoryList.stream().filter(cat ->
-          cat.getName().equals(it.getCategory())).findAny().get().getId();
-      categoryItems.setCategoryId(categoryId);
+    List<CategoryItems> categoryItems = new ArrayList<>();
+    menuRequest.getItem().stream().forEach(request -> {
+      CategoryItems categoryItem = new CategoryItems();
+
+      Optional<Item> item = items.stream().filter(itemDetail ->
+          itemDetail.getName().equals(request.getName())).findAny();
+      if (item != null && item.isPresent()) {
+        Long itemId = item.get().getId();
+        categoryItem.setItemId(itemId);
+      }
+
+
+      Optional<Category> category = categoryList.stream().filter(cat ->
+          cat.getName().equals(request.getCategory())).findAny();
+      if (category != null && category.isPresent()) {
+        Long categoryId = category.get().getId();
+        categoryItem.setCategoryId(categoryId);
+      }
+
+      categoryItems.add(categoryItem);
     });
 
+    categoryItemRepository.saveAll(categoryItems);
+
     return true;
+  }
+
+  @Override
+  public Object getItems() {
+    return itemRepository.findAll();
+  }
+
+  @Override
+  public Object getCategories() {
+    return categoryRepository.findAll();
   }
 }
