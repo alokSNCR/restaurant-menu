@@ -54,5 +54,7 @@ In-memory h2 database used to demonstrate the restaurant menu. Below is the url 
 
 http://localhost:9051/h2-console/login.jsp
 
+![Image description](https://github.com/alokSNCR/restaurant-menu/blob/master/h2-database.PNG)
+
     Note** : Please use this url to connect in-memory databse. If any issue occurred.
     URL: jdbc:h2:mem:testdb
