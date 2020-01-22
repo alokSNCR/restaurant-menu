@@ -48,7 +48,7 @@ Below are the GET api to fetch the item and categories details for the menu.
     **GET Categories API:** http://localhost:9051/restaurant/get_categories
        
 
-In-memory h2 database used to demonstrate the restaurant menu. Below is the url for in-memory database details.
+In-memory h2 database used to demonstrate the restaurant menu. Below is the url for in-memory database details, no password required to connect with database.
 
 http://localhost:9051/h2-console/login.jsp
 
