@@ -8,6 +8,8 @@ All the api details are available in the swagger document.
 
 http://localhost:9051/swagger-ui.html#/
 
+![Image description](https://github.com/alokSNCR/restaurant-menu/blob/master/swagger.PNG)
+
 All the API can be tested on the swagger UI. Below is the endpoint and request body for menu creation. 
 
     **POST API: http://localhost:9051/restaurant/createMenu**
