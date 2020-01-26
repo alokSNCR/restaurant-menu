@@ -1,6 +1,9 @@
 package com.presto.menu.service.impl;
 
 import com.presto.menu.model.JoeMenuRequest;
+import com.presto.menu.model.response.CategoryResponse;
+import com.presto.menu.model.response.ItemResponse;
+import com.presto.menu.model.response.Response;
 import com.presto.menu.repository.CategoryItemRepository;
 import com.presto.menu.repository.CategoryRepository;
 import com.presto.menu.repository.ItemRepository;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MenuServiceImpl implements MenuService {
@@ -27,63 +31,93 @@ public class MenuServiceImpl implements MenuService {
 
 
   @Override
-  public boolean saveMenu(JoeMenuRequest menuRequest) {
+  public Response addMenu(JoeMenuRequest menuRequest) {
+    Response response = new Response();
     // clean the table before add menu everyday
     categoryItemRepository.deleteAll();
     categoryRepository.deleteAll();
     itemRepository.deleteAll();
 
-    menuRequest.getItem().stream().forEach(item -> {
-      com.presto.menu.repository.entity.Item it = new com.presto.menu.repository.entity.Item();
-      it.setName(item.getName());
-      itemRepository.saveAndFlush(it);
-    });
+    List<com.presto.menu.model.Category> requestCat = menuRequest.getCategory();
+    List<Category> catList = new ArrayList<>();
+    if (requestCat != null && !requestCat.isEmpty()) {
+      requestCat.stream().forEach(cat -> {
+        Category category = new Category();
+        category.setName(cat.getName());
+        catList.add(category);
+      });
+      List<Category> cateList = categoryRepository.saveAll(catList);
+      response.setCategories(cateList);
+    }
 
-    menuRequest.getCategory().stream().forEach(category -> {
-      com.presto.menu.repository.entity.Category cat = new com.presto.menu.repository.entity.Category();
-      cat.setName(category.getName());
-      categoryRepository.saveAndFlush(cat);
-    });
-
+    List<com.presto.menu.model.Item> requestItem = menuRequest.getItem();
+    List<Item> itemList = new ArrayList<>();
+    if (requestItem != null && !requestItem.isEmpty()) {
+      requestItem.stream().forEach(item -> {
+        Item it = new Item();
+        it.setName(item.getName());
+        itemList.add(it);
+      });
+      List<Item> list = itemRepository.saveAll(itemList);
+      response.setItems(list);
+    }
 
     // save category item table
-    List<Item> items = itemRepository.findAll();
-
-    List<com.presto.menu.repository.entity.Category> categoryList = categoryRepository.findAll();
-    List<CategoryItems> categoryItems = new ArrayList<>();
-    menuRequest.getItem().stream().forEach(request -> {
-      CategoryItems categoryItem = new CategoryItems();
-
-      Optional<Item> item = items.stream().filter(itemDetail ->
-          itemDetail.getName().equals(request.getName())).findAny();
-      if (item != null && item.isPresent()) {
-        Long itemId = item.get().getId();
-        categoryItem.setItemId(itemId);
-      }
-
-
-      Optional<Category> category = categoryList.stream().filter(cat ->
-          cat.getName().equals(request.getCategory())).findAny();
-      if (category != null && category.isPresent()) {
-        Long categoryId = category.get().getId();
-        categoryItem.setCategoryId(categoryId);
-      }
-
-      categoryItems.add(categoryItem);
-    });
-
-    categoryItemRepository.saveAll(categoryItems);
-
-    return true;
+    if (requestItem != null && !requestItem.isEmpty()) {
+      List<CategoryItems> listCatItem = new ArrayList<>();
+      requestItem.stream().forEach(it -> {
+        CategoryItems categoryItem = new CategoryItems();
+        Item item = itemRepository.findItemByName(it.getName());
+        categoryItem.setItem(item);
+        Category cat = categoryRepository.findCategoryByName(it.getCategory());
+        categoryItem.setCategory(cat);
+        listCatItem.add(categoryItem);
+      });
+      categoryItemRepository.saveAll(listCatItem);
+    }
+    return response;
   }
 
   @Override
-  public Object getItems() {
-    return itemRepository.findAll();
+  public List<ItemResponse> getItems(JoeMenuRequest menuRequest) {
+    List<ItemResponse> itemResponses = new ArrayList<>();
+
+    List<CategoryItems> listCatItem = categoryItemRepository.findAll();
+    if (listCatItem != null) {
+      listCatItem.stream().forEach(categoryItems -> {
+        ItemResponse response = new ItemResponse();
+        if (categoryItems.getItem() != null) {
+          Optional<Item> item
+              = itemRepository.findById(categoryItems.getItem().getId());
+          if (item.isPresent()) {
+            response.setName(item.get().getName());
+          }
+        }
+
+        if (categoryItems.getCategory() != null) {
+          Optional<Category> category
+              = categoryRepository.findById(categoryItems.getCategory().getId());
+          if (category.isPresent()) {
+            response.setCategoryName(category.get().getName());
+          }
+        }
+        itemResponses.add(response);
+      });
+    }
+    return itemResponses;
   }
 
   @Override
-  public Object getCategories() {
-    return categoryRepository.findAll();
+  public List<CategoryResponse> getCategories(JoeMenuRequest menuRequest) {
+    List<CategoryResponse> catList = new ArrayList<>();
+    List<Category> categories = categoryRepository.findAll();
+    if (categories != null && !categories.isEmpty()) {
+      categories.stream().forEach(category -> {
+        CategoryResponse response = new CategoryResponse();
+        response.setName(category.getName());
+        catList.add(response);
+      });
+    }
+    return catList;
   }
 }

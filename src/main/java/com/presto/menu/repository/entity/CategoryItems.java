@@ -11,11 +11,13 @@ public class CategoryItems {
   @Column(name = "id", updatable = false, nullable = false)
   private Long Id;
 
-  @Column(name = "ITEM_ID")
-  private Long itemId;
+  @ManyToOne
+  @JoinColumn(name = "category_id")
+  private Category category;
 
-  @Column(name = "CATEGORY_ID")
-  private Long categoryId;
+  @ManyToOne
+  @JoinColumn(name = "ITEM_ID")
+  private Item item;
 
   public Long getId() {
     return Id;
@@ -25,19 +27,19 @@ public class CategoryItems {
     Id = id;
   }
 
-  public Long getItemId() {
-    return itemId;
+  public Category getCategory() {
+    return category;
   }
 
-  public void setItemId(Long itemId) {
-    this.itemId = itemId;
+  public void setCategory(Category category) {
+    this.category = category;
   }
 
-  public Long getCategoryId() {
-    return categoryId;
+  public Item getItem() {
+    return item;
   }
 
-  public void setCategoryId(Long categoryId) {
-    this.categoryId = categoryId;
+  public void setItem(Item item) {
+    this.item = item;
   }
 }

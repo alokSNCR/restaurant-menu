@@ -1,6 +1,7 @@
 package com.presto.menu.repository.entity;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "ITEMS")
@@ -8,9 +9,12 @@ public class Item{
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id", updatable = false, nullable = false)
+  @Column(name = "item_id", updatable = false, nullable = false)
   private Long id;
   private String name;
+
+  @OneToMany(mappedBy = "item")
+  Set<CategoryItems> categoryItems;
 
   public Item(){}
 

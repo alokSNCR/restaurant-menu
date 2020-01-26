@@ -3,10 +3,6 @@ package com.presto.menu.controller;
 import com.presto.menu.model.JoeMenuRequest;
 import com.presto.menu.model.response.Response;
 import com.presto.menu.service.MenuService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,28 +14,16 @@ import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping(value = "/restaurant")
-@Api(value = "The controller provides to perform all the admin related operations.")
-@ApiResponses(
-    value = {
-        @ApiResponse(code = 202, message = "Request has been accepted without any error"),
-        @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-        @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-        @ApiResponse(code = 500, message = "Internal server Error. Contact System administrator")
-    })
+
 public class MenuController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MenuController.class);
 
+
   @Autowired
   private MenuService menuService;
 
-  @ApiOperation(
-      value = "",
-      nickname = "createMenu",
-      notes = "This api will create menu details for the restaurant.",
-      response = Response.class)
-  @RequestMapping(value = "/createMenu", method = RequestMethod.POST)
+  @PostMapping(value = "/createMenu")
   @ResponseStatus(HttpStatus.CREATED)
   public Response createMenu(HttpServletRequest request,
                              HttpServletResponse response,
@@ -53,10 +37,11 @@ public class MenuController {
         apiResponse.setMessage("Missing request body.");
         return apiResponse;
       }
-
-      if (menuService.saveMenu(menuRequest)) {
-        apiResponse.setMessage("Menu created.");
-        apiResponse.setMenu(menuRequest);
+      apiResponse = menuService.addMenu(menuRequest);
+      if (apiResponse.getItems() != null && apiResponse.getCategories() != null) {
+        apiResponse.setMessage("Today menu added.");
+      } else {
+        apiResponse.setMessage("No item/categories added.");
       }
     } catch (Exception ex) {
       LOGGER.error("Error occurred while creating menu {}", ex);
@@ -64,26 +49,27 @@ public class MenuController {
     return apiResponse;
   }
 
-
-  @ApiOperation(
-      value = "",
-      nickname = "fetchItem",
-      notes = "This api will fetch all the items from the menu.",
-      response = Response.class)
-  @RequestMapping(value = "/get_items", method = RequestMethod.GET)
+  @GetMapping(value = "/get_items")
   @ResponseStatus(HttpStatus.OK)
-  public Object getItems() {
-    return menuService.getItems();
+  public Object getItems(HttpServletRequest request,
+                         HttpServletResponse response,
+                         @RequestBody(required = false) JoeMenuRequest menuRequest) {
+    try {
+      return menuService.getItems(menuRequest);
+    } catch (Exception ex) {
+      LOGGER.error("Error occurred while fetching items {}", ex);
+    }
+    return null;
   }
 
-  @ApiOperation(
-      value = "",
-      nickname = "fetchCategories",
-      notes = "This api will fetch all the categories from the menu.",
-      response = Response.class)
-  @RequestMapping(value = "/get_categories", method = RequestMethod.GET)
+  @GetMapping(value = "/get_categories")
   @ResponseStatus(HttpStatus.OK)
-  public Object getCategories() {
-    return menuService.getCategories();
+  public Object getCategories(@RequestBody(required = false) JoeMenuRequest menuRequest) {
+    try {
+      return menuService.getCategories(menuRequest);
+    } catch (Exception ex) {
+      LOGGER.error("Error occurred while fetching categories {}", ex);
+    }
+    return "No categories exit in system";
   }
 }
