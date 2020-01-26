@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class MenuServiceImpl implements MenuService {
@@ -83,7 +82,7 @@ public class MenuServiceImpl implements MenuService {
     List<ItemResponse> itemResponses = new ArrayList<>();
 
     List<CategoryItems> listCatItem = categoryItemRepository.findAll();
-    if (listCatItem != null) {
+    if (!listCatItem.isEmpty()) {
       listCatItem.stream().forEach(categoryItems -> {
         ItemResponse response = new ItemResponse();
         if (categoryItems.getItem() != null) {
@@ -111,7 +110,7 @@ public class MenuServiceImpl implements MenuService {
   public List<CategoryResponse> getCategories(JoeMenuRequest menuRequest) {
     List<CategoryResponse> catList = new ArrayList<>();
     List<Category> categories = categoryRepository.findAll();
-    if (categories != null && !categories.isEmpty()) {
+    if (!categories.isEmpty()) {
       categories.stream().forEach(category -> {
         CategoryResponse response = new CategoryResponse();
         response.setName(category.getName());
